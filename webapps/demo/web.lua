@@ -27,17 +27,6 @@ package.path  = package.path .. ";lib/?.lua"
 
 require "aprilann"
 
-function serialize_image(img, image_type)
-  assert(image_type)
-  local out = os.tmpname()
-  ImageIO.write(img, out, image_type)
-  local f   = io.open(out)
-  local bin = f:read("*a")
-  f:close()
-  assert(os.remove(out))
-  return bin
-end
-
 luaw_webapp = {
   resourcePattern = "handler%-.*%.lua$",
   viewPattern = "view%-.*%.lua$",
