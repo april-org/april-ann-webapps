@@ -19,12 +19,12 @@ check_and_copy_file()
     file=$2
     dst=$3
     error_msg=$4
-    if [[ ! -e $src/$file ]]; then
-        if [[ ! -e $path/$file ]]; then
+    if [[ ! -e $dst/$file ]]; then
+        if [[ ! -e $src/$file ]]; then
             echo $error_msg
             exit -1
         fi
-        cp $path $dst
+        cp $src/$file $dst
     fi
 }
 
