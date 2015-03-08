@@ -5,4 +5,4 @@ if [[ ! -e $executable ]]; then
     echo "Please, execute ./prepare.sh"
     exit -1
 fi
-$executable conf/server.cfg
+$executable conf/server.lua

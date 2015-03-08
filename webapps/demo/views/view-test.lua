@@ -13,7 +13,11 @@ do
 
   BEGIN 'body'
   do
-    TEXT 'Test image, RNN activations for parity task'
+    BEGIN 'p'
+    do
+      TEXT 'Test image, RNN activations for parity task'
+    end
+    END 'p'
     BEGIN 'image' { src='/demo/image' } END 'image'
   end
   END 'body'
