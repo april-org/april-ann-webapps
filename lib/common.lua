@@ -26,8 +26,16 @@ local function memoize(func)
   end
 end
 
+local function md5(path)
+  local f = assert(io.popen("md5sum " .. path, "r"))
+  local md5sum = f:read("*l"):match("([^%s]+)")
+  f:close()
+  return md5sum
+end
+
 return {
   serialize_image = serialize_image,
   to_json_array = to_json_array,
   memoize = memoize,
+  md5 = md5,
 }

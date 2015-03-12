@@ -12,7 +12,7 @@ local load_net  =
       return trainer,params
   end)
 
-local function clean(net_filename, img_dirty)
+local function clean_image(net_filename, img_dirty)
   local trainer,params = load_net(net_filename)
   img_dirty = img_dirty:to_grayscale():invert_colors()
   local clock = util.stopwatch()
@@ -29,6 +29,8 @@ return {
   root = root,
   resources = resources,
   nets_path = resources .. "/nets",
-  examples_path = resources .. "/DIRTY",
-  clean = clean,
+  examples_path = resources .. "/EXAMPLES",
+  dirty_path = resources .. "/DIRTY",
+  clean_path = resources .. "/CLEAN",
+  clean_image = clean_image,
 }
