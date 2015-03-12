@@ -42,7 +42,7 @@ POST 'clean/#model' {
     local img_clean = dibco_common.clean_image(net, img_dirty)
     ImageIO.write(img_clean, clean_dest)
   end
-                    }
+}
 
 GET 'demo' {
   function(req, resp, pathParams)
@@ -52,7 +52,7 @@ GET 'demo' {
     }
     return '/views/view-demo.lua',model
   end
-           }
+}
 
 GET 'images/clean/:hash' {
   function(req, resp, pathParams)
@@ -69,7 +69,7 @@ GET 'images/clean/:hash' {
       return "refresh"
     end
   end
-                         }
+}
 
 GET 'images/dirty/:hash' {
   function(req, resp, pathParams)
@@ -86,4 +86,4 @@ GET 'images/dirty/:hash' {
       return "refresh"
     end
   end
-                         }
+}
