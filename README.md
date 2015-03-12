@@ -26,4 +26,4 @@ $ ./run.sh
 ```
 
 Open the demo in a web browser:
-[localhost:7001/dibco/demo](localhost:7001/dibco/demo)
+[localhost:7001/dibco/demo](http://localhost:7001/dibco/demo)
