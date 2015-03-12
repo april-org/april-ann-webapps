@@ -11,14 +11,14 @@ local function escape(str)
 end
 
 local function parts_iterator(body, boundary)
-  local boundary = boundary .. "\r\n"
+  local boundary = boundary
   local boundary_size = #boundary
   local body_size = #body
   local boundary = escape(boundary)
   return coroutine.wrap(function()
       local data,gmatch
       local _,start = body:find(boundary)
-      start = start + 1
+      start = start + 3
       while start < body_size - boundary_size do
         local i,stop = body:find(boundary, start)
         data = body:sub(start, i - 5)
@@ -32,7 +32,7 @@ local function parts_iterator(body, boundary)
           header_size = header_size + #line
         end
         coroutine.yield(headers, data:sub(header_size + 1))
-        start = stop + 1
+        start = stop + 3
       end
   end)
 end
@@ -55,7 +55,7 @@ local function parse(req)
     else
       local filename = get_field("filename", headers[CONTENT_DISPOSITION])
       local tmpname = os.tmpname()
-      local f = io.open(tmpname)
+      local f = io.open(tmpname, "w")
       f:write(content)
       f:close()
       files[name] = {
