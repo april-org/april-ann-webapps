@@ -2,7 +2,9 @@ local common    = require "common"
 local root      = "webapps/dibco"
 local resources = root .. "/res"
 local bsize     = 256
---
+
+-- loads a neural network and its params table; note that this function is
+-- memoized, so a neural network is only loaded once
 local load_net  =
   common.memoize(function(net_filename)
       local trainer = trainable.supervised_trainer.load(net_filename,
@@ -12,6 +14,8 @@ local load_net  =
       return trainer,params
   end)
 
+-- receives a network filename, a dirty image instance and returns an image
+-- instance which is the clean version of the given dirty image
 local function clean_image(net_filename, img_dirty)
   local trainer,params = load_net(net_filename)
   img_dirty = img_dirty:to_grayscale():invert_colors()
@@ -24,7 +28,8 @@ local function clean_image(net_filename, img_dirty)
   collectgarbage("collect")
   return img_clean
 end
---
+
+-- functions export
 return {
   root = root,
   resources = resources,

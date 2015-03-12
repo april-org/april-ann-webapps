@@ -13,7 +13,7 @@ do
 
   BEGIN 'body'
   do
-    BEGIN 'form'{ action='http://localhost:7001/dibco/clean', method='post',
+    BEGIN 'form'{ action='/dibco/clean', method='post',
                   enctype="multipart/form-data" }
     do
       BEGIN 'br' END 'br'
