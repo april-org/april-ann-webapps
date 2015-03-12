@@ -5,7 +5,7 @@ do
   do
     BEGIN 'title'
     do
-      TEXT 'TEST'
+      TEXT 'DIBCO demo'
     end
     END 'title'
   end

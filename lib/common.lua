@@ -38,10 +38,33 @@ local function md5(path)
   return md5sum
 end
 
+-- receives a table with the fields: input_dataset, output_dataset, trainer
+local function use_dataset_thread(tbl)
+  local input_ds  = assert(tbl.input_dataset, "Needs input_dataset field")
+  local output_ds = assert(tbl.output_dataset, "Needs output_dataset field")
+  local trainer   = assert(tbl.trainer, "Needs trainer field")
+  local bsize     = assert(tbl.bunch_size or trainer.bunch_size,
+                           "Needs bunch_size field")
+  assert(input_ds:numPatterns() == output_ds:numPatterns(),
+         "Not compatible number of patterns in given input/output datasets")
+  local net             = trainer:get_component()
+  local output_ds_token = dataset.token.wrapper(output_ds)
+  local iterator_conf   = { datasets = { input_ds }, bunch_size = bsize }
+  for pat,indexes in trainable.dataset_multiple_iterator(iterator_conf) do
+    collectgarbage("collect")
+    net:reset()
+    local out = net:forward(pat)
+    output_ds_token:putPatternBunch(indexes, out)
+    coroutine.yield()
+  end
+  return true
+end
+
 -- returns the list of exported functions
 return {
   serialize_image = serialize_image,
   to_json_array = to_json_array,
   memoize = memoize,
   md5 = md5,
+  use_dataset_thread = use_dataset_thread,
 }
