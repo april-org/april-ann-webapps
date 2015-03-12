@@ -18,6 +18,8 @@ do
     do
       BEGIN 'label' TEXT 'Select an image' END 'label'
       BEGIN 'input'{ type='file', name='img_dirty_file' } END 'input'
+      BEGIN 'input'{ type='text', name='text1', value='3' } END 'input'
+      BEGIN 'input'{ type='text', name='text2', value='4' } END 'input'
       BEGIN 'br' END 'br'
       BEGIN 'input'{ type='submit', value='Send' } END 'input'
     end
