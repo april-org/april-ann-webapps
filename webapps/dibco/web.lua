@@ -1,5 +1,4 @@
 package.cpath = package.cpath .. ";lib/?.so"
-package.path  = package.path .. ";lib/?.lua"
 
 -- FIXME: This code is producing problems when executing Luaw handlers
 --

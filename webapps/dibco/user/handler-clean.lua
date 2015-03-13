@@ -11,7 +11,7 @@ local nets_path       = dibco_common.nets_path
 local examples_path   = dibco_common.examples_path
 local dirty_path      = dibco_common.dirty_path
 local clean_path      = dibco_common.clean_path
-local clean_image     = dibco_common.clean_image
+local clean_image     = dibco_common.clean_image_thread
 
 -- masks for glob function
 local NETS_MASK     = nets_path .. "/*.net"
@@ -29,16 +29,14 @@ POST 'clean' {
     local params,files = multipart.parse(req)
     local model        = params.model
     local example      = params.example
-    local name,path
+    local name,path,file_info
     if #example == 0 then
       -- in case of no example, the data is taken from a multipart file
-      local file_info = files.img_dirty_file
-      name = file_info.name
-      path = file_info.path
+      file_info = files.img_dirty_file
+      name,path = file_info.name,file_info.path
     else
       -- in other case, the data is taken from the example filename
-      name = example
-      path = table.concat{ examples_path, "/", example }
+      name,path = example,table.concat{ examples_path, "/", example }
     end
     -- the extension is used by ImageIO to select the proper driver
     local ext          = name:get_extension()
@@ -50,39 +48,24 @@ POST 'clean' {
                                        md5sum, "_", name }
     -- w,h are for <img> tag fields
     local w,h = img_dirty:geometry()
-    resp:setStatus(200)
-    resp:appendBody(string.format([[
-<html>
-<head></head>
-<body>
-Please wait, the process may take a few minutes.
-<table>
-<tr><td> Model <b> %s </b> </td></tr>
-<tr></tr>
-<tr><td> <b>Dirty image</b> </td></tr>
-<tr><td><a href="/dibco/images/dirty/%s"><img width='%d' height='%d' src="/dibco/images/dirty/%s" /></a></td></tr>
-<tr></tr>
-<tr><td> <b>Clean image</b> </td></tr>
-<tr><td><a href="/dibco/images/clean/%s"><img width='%d' height='%d' src="/dibco/images/clean/%s" /></a></td></tr>
-</table>
-</body>
-</html>
-]], model, hashed_name, w, h, hashed_name, hashed_name, w, h, hashed_name))
-    resp:flush()
-    resp:close()
-    if files.img_dirty_file then
-      files.img_dirty_file:clean()
-    end
+    if file_info then file_info:clean() end
     -- generate the destination path for dirty and clean images
     local dirty_dest = table.concat{ dirty_path, "/", hashed_name }
     local clean_dest = table.concat{ clean_path, "/", hashed_name }
     ImageIO.write(img_dirty, dirty_dest, ext)
     if not io.open(clean_dest) then
-      -- only execute cleaning in case the destination path doesn't exists
-      local model_path = table.concat{ nets_path, "/", model }
-      local img_clean = clean_image(model_path, img_dirty)
-      ImageIO.write(img_clean, clean_dest)
+      -- execute clean process in a new thread
+      local scheduler = Luaw.scheduler
+      local thread    = scheduler.startUserThread(function()
+          -- only execute cleaning in case the destination path doesn't exists
+          local model_path = table.concat{ nets_path, "/", model }
+          local img_clean = clean_image(model_path, img_dirty) -- threaded
+          ImageIO.write(img_clean, clean_dest)
+      end)
     end
+    return '/views/view-result.lua', { model=model,
+                                       hashed_name=hashed_name,
+                                       w=w, h=h }
   end
 }
 
@@ -114,37 +97,25 @@ GET 'demo' {
 }
 
 -- returns a clean image given its hashed name
-GET 'images/clean/:hash' {
+GET 'images/:type/:hash' {
   function(req, resp, pathParams)
+    local img_type = pathParams.type
+    assert(img_type == "clean" or img_type == "dirty",
+           "Incorrect type argument")
+    local img_path = img_type=="clean" and clean_path or dirty_path
     local hash = pathParams.hash
     local ext  = hash:get_extension()
-    local path = table.concat{ clean_path, "/", hash }
+    local path = table.concat{ img_path, "/", hash }
     local f    = io.open(path)
     if f then
       resp:setStatus(200)
       resp:addHeader("Content-Type", "image/png")
       resp:appendBody(f:read("*a"))
-      resp:flush()
     else
-      return "refresh"
-    end
-  end
-}
-
--- returns a dirty image given its hashed name
-GET 'images/dirty/:hash' {
-  function(req, resp, pathParams)
-    local hash = pathParams.hash
-    local ext  = hash:get_extension()
-    local path = table.concat{ dirty_path, "/", hash }
-    local f    = io.open(path)
-    if f then
       resp:setStatus(200)
-      resp:addHeader("Content-Type", "image/png")
-      resp:appendBody(f:read("*a"))
-      resp:flush()
-    else
-      return "refresh"
+      local f = io.open(resources .. "/loading.gif")
+      resp:addHeader("Content-Type", "image/gif")
+      resp:appendBody(f:read("*a"))      
     end
   end
 }
