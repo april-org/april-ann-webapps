@@ -96,48 +96,26 @@ GET 'demo' {
   end
 }
 
-GET 'loop' {
-  function(req, resp, pathParams)
-    local scheduler = Luaw.scheduler
-    local thread    = scheduler.startUserThread(function()
-        for i=1,1000 do print(i) coroutine.yield() end
-    end)
-    return "Loop"
-  end
-}
-
 -- returns a clean image given its hashed name
-GET 'images/clean/:hash' {
+GET 'images/:type/:hash' {
   function(req, resp, pathParams)
+    local img_type = pathParams.type
+    assert(img_type == "clean" or img_type == "dirty",
+           "Incorrect type argument")
+    local img_path = img_type=="clean" and clean_path or dirty_path
     local hash = pathParams.hash
     local ext  = hash:get_extension()
-    local path = table.concat{ clean_path, "/", hash }
+    local path = table.concat{ img_path, "/", hash }
     local f    = io.open(path)
     if f then
       resp:setStatus(200)
       resp:addHeader("Content-Type", "image/png")
       resp:appendBody(f:read("*a"))
-      resp:flush()
     else
-      return "refresh"
-    end
-  end
-}
-
--- returns a dirty image given its hashed name
-GET 'images/dirty/:hash' {
-  function(req, resp, pathParams)
-    local hash = pathParams.hash
-    local ext  = hash:get_extension()
-    local path = table.concat{ dirty_path, "/", hash }
-    local f    = io.open(path)
-    if f then
       resp:setStatus(200)
-      resp:addHeader("Content-Type", "image/png")
-      resp:appendBody(f:read("*a"))
-      resp:flush()
-    else
-      return "refresh"
+      local f = io.open(resources .. "/loading.gif")
+      resp:addHeader("Content-Type", "image/gif")
+      resp:appendBody(f:read("*a"))      
     end
   end
 }
