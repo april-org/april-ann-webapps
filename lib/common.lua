@@ -39,11 +39,10 @@ local function md5(path)
 end
 
 -- receives a table with the fields: input_dataset, output_dataset, trainer
-local function use_dataset_thread(tbl)
+local function async_use_dataset(trainer, tbl)
   assert(tbl,  "Needs a table as argument")
   local input_ds  = assert(tbl.input_dataset, "Needs input_dataset field")
   local output_ds = assert(tbl.output_dataset, "Needs output_dataset field")
-  local trainer   = assert(tbl.trainer, "Needs trainer field")
   local bsize     = assert(tbl.bunch_size or trainer.bunch_size,
                            "Needs bunch_size field")
   assert(input_ds:numPatterns() == output_ds:numPatterns(),
@@ -72,5 +71,5 @@ return {
   to_json_array = to_json_array,
   memoize = memoize,
   md5 = md5,
-  use_dataset_thread = use_dataset_thread,
+  async_use_dataset = async_use_dataset,
 }
