@@ -32,7 +32,7 @@ end
 
 -- computes MD5 by using shell commands
 local function md5(path)
-  local f = assert(io.popen("md5 " .. path, "r"))
+  local f = assert(io.popen("md5sum " .. path, "r"))
   local md5sum = assert(f:read("*l")):match("([^%s]+)")
   f:close()
   return md5sum
