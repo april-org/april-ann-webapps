@@ -123,12 +123,13 @@ GET 'images/:type/:hash' {
   end
 }
 
--- returns a clean image given its hashed name
-GET 'resources/:name' {
-  function(req, resp, pathParams)
-    local name = pathParams.name
-    resp:setStatus(200)
-    send_file(table.concat{ resources, "/", name}, resp,
-              get_mime_from_filename(name))
-  end
-}
+-- returns any resource in the given path
+local function resource_handler(req, resp, pathParams)
+  local path = pathParams.path
+  resp:setStatus(200)
+  send_file(table.concat{ resources, "/", path}, resp,
+            get_mime_from_filename(path))  
+end
+
+GET 'res/:path' { resource_handler }
+GET 'res/js/:path' { resource_handler }

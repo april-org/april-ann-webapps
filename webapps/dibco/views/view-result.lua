@@ -30,7 +30,7 @@ do
       BEGIN 'tr' BEGIN 'td' BEGIN 'b' TEXT 'Clean image' END 'b' END 'td' END 'tr'
       
       BEGIN 'tr' BEGIN 'td' BEGIN 'a'{ href="/dibco/images/clean/"..model.hashed_name }
-      BEGIN 'image'{ name="refresh", src="/dibco/resources/loading.gif" } END 'image'
+      BEGIN 'image'{ name="refresh", src="/dibco/res/loading.gif" } END 'image'
       END 'a' END 'td' END 'tr'
     
     end

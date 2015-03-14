@@ -96,7 +96,7 @@ local mimes = {
 }
 local function get_mime_from_filename(filename)
   local ext = filename:get_extension()
-  return (assert(mimes[ext], "Unknown file extension"))
+  return mimes[ext] or mimes.txt
 end
 
 -- returns the list of exported functions
