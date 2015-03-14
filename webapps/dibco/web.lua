@@ -1,5 +1,3 @@
-package.cpath = package.cpath .. ";lib/?.so"
-
 -- FIXME: This code is producing problems when executing Luaw handlers
 --
 -- -- To avoid problems between globals in APRIL-ANN and Luaw, this functions
@@ -23,8 +21,6 @@ package.cpath = package.cpath .. ";lib/?.so"
 --   })
 -- end
 -- protect_globals_redefinition()
-
-require "aprilann"
 
 luaw_webapp = {
   resourcePattern = "handler%-.*%.lua$",
