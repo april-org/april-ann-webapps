@@ -30,10 +30,7 @@ do
       BEGIN 'tr' BEGIN 'td' BEGIN 'b' TEXT 'Clean image' END 'b' END 'td' END 'tr'
       
       BEGIN 'tr' BEGIN 'td' BEGIN 'a'{ href="/dibco/images/clean/"..model.hashed_name }
-      BEGIN 'image'{ src="/dibco/images/clean/" .. model.hashed_name,
-                     --width=model.w, height=model.h,
-                     name="refresh",
-                   } END 'image'
+      BEGIN 'image'{ name="refresh", src="/dibco/resources/loading.gif" } END 'image'
       END 'a' END 'td' END 'tr'
     
     end
@@ -41,14 +38,22 @@ do
     
     BEGIN 'script' { language='JavaScript', type="text/javascript" }
     do
+      local image_src = "/dibco/images/clean/"..model.hashed_name
       TEXT(string.format([[
-var t = 20 // Interval in Seconds
-function Start() { 
-  document.images["refresh"].src = "%s?" + new Date().getTime();
-  setTimeout("Start()", t*1000) 
+function Start() {
+  var t     = 20; // Interval in Seconds
+  var image = new Image();
+  var time  = new Date().getTime();
+  image.src = "%s?" + time;
+  image.onload = function() {
+      document.images["refresh"].src = image.src;
+  };
+  image.onerror = function() {
+      setTimeout("Start()", t*1000);
+  };
 } 
 Start();
-]], "/dibco/images/clean/"..model.hashed_name))
+]], image_src, image_src))
     end
     END 'script'
 

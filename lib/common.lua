@@ -8,7 +8,6 @@ local CHUNK_SIZE = 4096
 local function send_iterable_data(it, resp, mime)
   assert(class.is_a(it, iterator))
   local mime = mime or "text/plain"
-  resp:setStatus(200)
   resp:startStreaming()
   for data in it do
     assert(type(data) == "string", "Needs an iterator of strings")
@@ -18,8 +17,12 @@ end
 
 local function send_file(f, resp, mime)
   if type(f) == "string" then f = io.open(f) end
-  send_iterable_data(iterator(function() return f:read(CHUNK_SIZE) end),
-                     resp, mime)
+  if f then
+    send_iterable_data(iterator(function() return f:read(CHUNK_SIZE) end),
+                       resp, mime)
+  else
+    resp:setStatus(404)
+  end
 end
 
 -- receives an image instance, its type (png, jpg, ...) and returns a string
@@ -84,9 +87,22 @@ local function async_use_dataset(trainer, tbl)
   return true
 end
 
+local mimes = {
+  gif  = "image/gif",
+  png  = "image/png",
+  txt  = "plain/text",
+  js   = "plain/text",
+  html = "plain/text",
+}
+local function get_mime_from_filename(filename)
+  local ext = filename:get_extension()
+  return (assert(mimes[ext], "Unknown file extension"))
+end
+
 -- returns the list of exported functions
 return {
   async_use_dataset = async_use_dataset,
+  get_mime_from_filename = get_mime_from_filename,
   md5 = md5,
   memoize = memoize,
   send_iterable_data = send_iterable_data,

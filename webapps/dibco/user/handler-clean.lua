@@ -3,6 +3,7 @@ local common          = require "common"
 local dibco_common    = require "dibco_common"
 local multipart       = require "multipart"
 --
+local get_mime_from_filename = common.get_mime_from_filename
 local md5             = common.md5
 local send_file       = common.send_file
 local serialize_image = common.serialize_image
@@ -113,9 +114,20 @@ GET 'images/:type/:hash' {
     local path = table.concat{ img_path, "/", hash }
     local f    = io.open(path)
     if f then
-      send_file(f, resp, "image/png")
+      resp:setStatus(200)
+      send_file(f, resp, get_mime_from_filename(hash))
     else
-      send_file(resources .. "/loading.gif", resp, "image/gif")
+      resp:setStatus(404)
     end
+  end
+}
+
+-- returns a clean image given its hashed name
+GET 'resources/:name' {
+  function(req, resp, pathParams)
+    local name = pathParams.name
+    resp:setStatus(200)
+    send_file(table.concat{ resources, "/", name}, resp,
+              get_mime_from_filename(name))
   end
 }
