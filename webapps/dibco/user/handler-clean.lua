@@ -42,6 +42,7 @@ POST 'clean' {
       -- in other case, the data is taken from the example filename
       name,path = example,table.concat{ examples_path, "/", example }
     end
+    assert(name, "Needs an example or a file selection")
     -- the extension is used by ImageIO to select the proper driver
     local ext          = name:get_extension()
     local img_dirty    = ImageIO.read(path, ext)
