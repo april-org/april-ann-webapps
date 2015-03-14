@@ -1,16 +1,35 @@
-local tuple = require "tuple"
+package.cpath  = package.cpath .. ";lib/?.so"
+local aprilann = require "aprilann"
+local tuple    = require "tuple"
+--
+local CHUNK_SIZE = 4096
+
+-- receives an APRIL-ANN iterator, the response object and the mime-type
+local function send_iterable_data(it, resp, mime)
+  assert(class.is_a(it, iterator))
+  local mime = mime or "text/plain"
+  resp:setStatus(200)
+  resp:startStreaming()
+  for data in it do
+    assert(type(data) == "string", "Needs an iterator of strings")
+    resp:appendBody(data) end
+  resp:flush()  
+end
+
+local function send_file(f, resp, mime)
+  if type(f) == "string" then f = io.open(f) end
+  send_iterable_data(iterator(function() return f:read(CHUNK_SIZE) end),
+                     resp, mime)
+end
 
 -- receives an image instance, its type (png, jpg, ...) and returns a string
 -- binary representation of the image
-local function serialize_image(img, image_type)
+local function send_image(img, image_type, resp)
   assert(image_type, "Needs the image type as second argument")
   local out = os.tmpname()
   ImageIO.write(img, out, image_type)
-  local f   = io.open(out)
-  local bin = f:read("*a")
-  f:close()
-  assert(os.remove(out))
-  return bin
+  send_file(out, resp, "image/" .. image_type)
+  assert(os.remove(out), "Unable to remove the temporary file")
 end
 
 local str_fmt = bind(string.format, "%q")
@@ -67,9 +86,11 @@ end
 
 -- returns the list of exported functions
 return {
-  serialize_image = serialize_image,
-  to_json_array = to_json_array,
-  memoize = memoize,
-  md5 = md5,
   async_use_dataset = async_use_dataset,
+  md5 = md5,
+  memoize = memoize,
+  send_iterable_data = send_iterable_data,
+  send_image = send_image,
+  send_file = send_file,
+  to_json_array = to_json_array,
 }

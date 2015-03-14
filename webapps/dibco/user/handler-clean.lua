@@ -1,17 +1,19 @@
 -- libraries and aliases
-local multipart       = require "multipart"
 local common          = require "common"
 local dibco_common    = require "dibco_common"
+local multipart       = require "multipart"
+--
+local md5             = common.md5
+local send_file       = common.send_file
 local serialize_image = common.serialize_image
 local to_json_array   = common.to_json_array
-local md5             = common.md5
-local root            = dibco_common.root
-local resources       = dibco_common.resources
-local nets_path       = dibco_common.nets_path
-local examples_path   = dibco_common.examples_path
-local dirty_path      = dibco_common.dirty_path
+--
+local clean_image     = dibco_common.async_clean_image
 local clean_path      = dibco_common.clean_path
-local clean_image     = dibco_common.clean_image_thread
+local dirty_path      = dibco_common.dirty_path
+local examples_path   = dibco_common.examples_path
+local nets_path       = dibco_common.nets_path
+local resources       = dibco_common.resources
 
 -- masks for glob function
 local NETS_MASK     = nets_path .. "/*.net"
@@ -26,6 +28,7 @@ end
 -- and the image file (it can be an 'example' filename, or a multipart file)
 POST 'clean' {
   function(req, resp, pathParams)
+    collectgarbage("collect")
     local params,files = multipart.parse(req)
     local model        = params.model
     local example      = params.example
@@ -86,6 +89,7 @@ GET 'examples' {
 -- returns the webpage with the basic demo UI
 GET 'demo' {
   function(req, resp, pathParams)
+    collectgarbage("collect")
     local nets_list = glob(NETS_MASK)
     local examples_list = glob(EXAMPLES_MASK)
     local model = {
@@ -99,6 +103,7 @@ GET 'demo' {
 -- returns a clean image given its hashed name
 GET 'images/:type/:hash' {
   function(req, resp, pathParams)
+    collectgarbage("collect")
     local img_type = pathParams.type
     assert(img_type == "clean" or img_type == "dirty",
            "Incorrect type argument")
@@ -108,14 +113,9 @@ GET 'images/:type/:hash' {
     local path = table.concat{ img_path, "/", hash }
     local f    = io.open(path)
     if f then
-      resp:setStatus(200)
-      resp:addHeader("Content-Type", "image/png")
-      resp:appendBody(f:read("*a"))
+      send_file(f, resp, "image/png")
     else
-      resp:setStatus(200)
-      local f = io.open(resources .. "/loading.gif")
-      resp:addHeader("Content-Type", "image/gif")
-      resp:appendBody(f:read("*a"))      
+      send_file(resources .. "/loading.gif", resp, "image/gif")
     end
   end
 }

@@ -1,7 +1,8 @@
 local common    = require "common"
+--
+local bsize     = 1024
 local root      = "webapps/dibco"
 local resources = root .. "/res"
-local bsize     = 1024
 
 local async_use_dataset = common.async_use_dataset
 
@@ -21,7 +22,7 @@ local load_net  =
 
 -- receives a network filename, a dirty image instance and returns an image
 -- instance which is the clean version of the given dirty image
-local function clean_image_thread(net_filename, img_dirty)
+local function async_clean_image(net_filename, img_dirty)
   local trainer,params = load_net(net_filename)
   img_dirty = img_dirty:to_grayscale():invert_colors()
   local clock = util.stopwatch()
@@ -36,11 +37,11 @@ end
 
 -- functions export
 return {
-  root = root,
-  resources = resources,
-  nets_path = resources .. "/nets",
-  examples_path = resources .. "/EXAMPLES",
-  dirty_path = resources .. "/DIRTY",
+  async_clean_image = async_clean_image,
   clean_path = resources .. "/CLEAN",
-  clean_image_thread = clean_image_thread,
+  dirty_path = resources .. "/DIRTY",
+  examples_path = resources .. "/EXAMPLES",
+  resources = resources,
+  root = root,
+  nets_path = resources .. "/nets",
 }
