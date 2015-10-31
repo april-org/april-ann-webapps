@@ -20,23 +20,23 @@ OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 SOFTWARE.
 ]]
 
-local luaw_lib = require("luaw_lib")
+local constants = require('luaw_constants')
 local ds_lib = require('luaw_data_structs_lib')
-local logging = require('luaw_logging')
-
--- Constants
-local TS_RUNNABLE = Luaw.TS_RUNNABLE
-local TS_DONE = Luaw.TS_DONE
-local TS_BLOCKED_EVENT = Luaw.TS_BLOCKED_EVENT
-local TS_BLOCKED_THREAD = Luaw.TS_BLOCKED_THREAD
-
-local END_OF_CALL = {"END_OF_CALL"}
-local END_OF_THREAD = {"END_OF_THREAD"}
-
-local UPDATE_TIME_COUNTER_LIMIT = 10
+-- FIXME: this line is generating a loop in Lua require
+-- local logging = require('luaw_logging')
 
 -- Scheduler object
 local scheduler = {}
+
+-- Constants
+local TS_RUNNABLE = constants.RUNNABLE
+local TS_DONE = constants.DONE
+local TS_BLOCKED_EVENT = constants.BLOCKED_ON_EVENT
+local TS_BLOCKED_THREAD = constants.BLOCKED_ON_THREAD
+local END_OF_CALL = constants.END_OF_CALL
+local END_OF_THREAD = constants.END_OF_THREAD
+
+local UPDATE_TIME_COUNTER_LIMIT = 10
 
 -- scheduler state
 local threadRegistry = ds_lib.newRegistry(luaw_server_config.thread_pool_size or 1024)
@@ -54,7 +54,7 @@ scheduler.updateCurrentTime = function ()
     updateTimeCyclingCounter = updateTimeCyclingCounter + 1
     if (updateTimeCyclingCounter >= UPDATE_TIME_COUNTER_LIMIT) then
         currentTime = os.time()
-        logging.updateCurrentTime(currentTime)
+        -- FIXME: logging.updateCurrentTime(currentTime)
         updateTimeCyclingCounter = 0
     end
 end

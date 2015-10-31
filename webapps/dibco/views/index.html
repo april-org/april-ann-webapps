@@ -1,0 +1,29 @@
+<html ng-app="myApp">
+  <head>
+    <meta charset="utf8" />
+    <title>DIBCO demo</title>
+    <link rel="stylesheet" href="/dibco/res/css/app.css"></link>
+    <script src="https://ajax.googleapis.com/ajax/libs/angularjs/1.0.7/angular.min.js"></script>
+    <script src="https://ajax.googleapis.com/ajax/libs/angularjs/1.0.7/angular-bootstrap.min.js"></script>
+    <script src="/dibco/res/js/app.js"></script>
+    <script src="/dibco/res/js/services/services.js"></script>
+    <script src="/dibco/res/js/controllers/controllers.js"></script>
+    <script src="/dibco/res/js/filters/filters.js"></script>
+    <script src="/dibco/res/js/directives/directives.js"></script>
+  </head>
+  <body>
+    <div ng-controller="AppCtrl">
+      <div class="row-fluid">
+        <h1> <span ng-bind="appname" /> </h1>
+      </div>
+      
+      <div id="view" ng-view></div>
+      
+      <div class="row-fluid">
+        <div class="footer">
+          Web apps for APRIL-ANN v<span ng-bind="app-version"></span>
+        </div>
+      </div>
+    </div>
+  </body>
+</html>

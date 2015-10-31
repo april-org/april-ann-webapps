@@ -1,0 +1,28 @@
+<div>
+  <h2>DIBCO image cleaning demo</h2>
+  <form class="css-form" name="form1" ng-controller="demoCtrl">
+    <label>Select a model</label>
+    <select name="model" ng-model="refs.item.model"
+            ng-options="i for i in nets_list|orderBy:['i']"
+            required>
+    </select>
+    <br><br>
+    <label>Pick an example or upload a new file</label>
+    <select name="example" ng-model="refs.item.example"
+            ng-options="i for i in examples_list|orderBy:['i']">
+    </select>
+    <br><br>
+    <label>Upload an image</label>
+    <input type="file" name="image" file-model="refs.item.image">
+    <br><br>
+    <div>
+      <button class="btn btn-success black" type="submit" ng-click="form1.$invalid || submitForm()">Submit</button>
+      <button class="btn btn-dnager black" type="button" ng-click="reset()">Reset</button>
+    </div>
+  </form>
+  <div>
+    <img src="{{$scope.dirty_image}}">
+    <br>
+    <img src="{{$scope.cleaned_image}}">
+  </div>
+</div>

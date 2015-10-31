@@ -3,6 +3,7 @@ local common    = require "common"
 local bsize     = 1024
 local root      = "webapps/dibco"
 local resources = root .. "/res"
+local html_path = root .. "/views/html"
 
 local async_use_dataset = common.async_use_dataset
 
@@ -44,4 +45,5 @@ return {
   resources = resources,
   root = root,
   nets_path = resources .. "/nets",
+  html_path = html_path,
 }

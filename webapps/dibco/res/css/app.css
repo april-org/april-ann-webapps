@@ -1,0 +1,51 @@
+// Uncomment this in Plunker or JSFiddle:
+@import url('https://netdna.bootstrapcdn.com/twitter-bootstrap/2.3.2/css/bootstrap.min.css');
+@import url('https://netdna.bootstrapcdn.com/twitter-bootstrap/2.3.2/css/bootstrap-responsive.min.css');
+
+body {
+    padding-top: 40px;
+    padding-bottom: 60px;
+    background-color: black;
+    color: white;
+}
+
+.red {
+  font-weight:bold;
+  color:red;
+}
+
+.white {
+    color:white;
+}
+
+.black {
+    color:black;
+}
+
+.centered {
+    margin: 0 auto;
+}
+
+.container > hr {
+    margin: 60px 0;
+}
+
+.footer {
+    margin-top: 20px;
+} 
+
+.error-modal {
+    color: black;
+}
+
+.yesno-modal {
+    color: black;
+}
+
+.deactive {
+}
+
+.custom-error {
+    color: #fb4a48;
+    font-weight: bold;
+}

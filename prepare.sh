@@ -31,7 +31,11 @@ check_and_copy_file()
 check_arg "APRIL-ANN" "first" "$aprilann_path"
 check_arg "Luaw" "second" "$luaw_path"
 
-check_and_copy_file $aprilann_path/lib aprilann.so lib/ "Unable to locate APRIL-ANN dynamic library: $aprilann_so"
+check_and_copy_file $aprilann_path/lib aprilann.so lib/ "Unable to locate APRIL-ANN dynamic library: aprilann,so"
+check_and_copy_file $aprilann_path/lib libapril-ann.so lib/ "Unable to locate APRIL-ANN dynamic library: libapril-ann.so"
 check_and_copy_file $luaw_path/src luaw_server bin/ "Unable to locate Luaw executable: $luaw_server"
+for i in $luaw_path/lib/*.lua; do
+    check_and_copy_file $luaw_path/lib $(basename $i) bin/ "Unable to locate Luaw file: $i"
+done
 
 echo "Ok"

@@ -1,25 +1,46 @@
-package.cpath  = package.cpath .. ";lib/?.so"
-local aprilann = require "aprilann"
-local tuple    = require "tuple"
+package.cpath   = package.cpath .. ";lib/?.so"
+local aprilann  = require "aprilann"
+local scheduler = require "luaw_scheduler"
+local timer_lib = require "luaw_timer"
+local tuple     = require "tuple"
 --
 local CHUNK_SIZE = 4096
+
+local mimes = {
+  gif  = "image/gif",
+  jpg  = "image/jpeg",
+  png  = "image/png",
+  txt  = "text/plain",
+  html = "text/html",
+  css  = "text/css",
+  js   = "application/javascript",
+}
+local function get_mime_from_filename(filename)
+  local ext = filename:get_extension()
+  return assert(mimes[ext], "Unknown file extension: "..(ext or "nil"))
+end
 
 -- receives an APRIL-ANN iterator, the response object and the mime-type
 local function send_iterable_data(it, resp, mime)
   assert(class.is_a(it, iterator))
-  local mime = mime or "text/plain"
+  local mime  = mime or mimes.txt
+  local timer = timer_lib.newTimer()
   resp:startStreaming()
   for data in it do
     assert(type(data) == "string", "Needs an iterator of strings")
-    resp:appendBody(data) end
-  resp:flush()  
+    resp:appendBody(data)
+    timer:sleep(1) -- 1 miliseconds
+  end
+  resp:flush()
+  timer:delete()
+  resp:close()
 end
 
 local function send_file(f, resp, mime)
   if type(f) == "string" then f = io.open(f) end
   if f then
-    send_iterable_data(iterator(function() return f:read(CHUNK_SIZE) end),
-                       resp, mime)
+    resp:setStatus(200)
+    send_iterable_data(iterator(f:lines(CHUNK_SIZE)), resp, mime)
   else
     resp:setStatus(404)
   end
@@ -70,7 +91,7 @@ local function async_use_dataset(trainer, tbl)
   assert(input_ds:numPatterns() == output_ds:numPatterns(),
          "Not compatible number of patterns in given input/output datasets")
   -- timer for thread control
-  local timer           = Luaw.newTimer()
+  local timer           = timer_lib.newTimer()
   local net             = trainer:get_component()
   local output_ds_token = dataset.token.wrapper(output_ds)
   local iterator_conf   = { datasets = { input_ds }, bunch_size = bsize }
@@ -84,19 +105,8 @@ local function async_use_dataset(trainer, tbl)
     -- print(n/nump)
     timer:sleep(1) -- 1 miliseconds
   end
+  timer:delete()
   return true
-end
-
-local mimes = {
-  gif  = "image/gif",
-  png  = "image/png",
-  txt  = "plain/text",
-  js   = "plain/text",
-  html = "plain/text",
-}
-local function get_mime_from_filename(filename)
-  local ext = filename:get_extension()
-  return mimes[ext] or mimes.txt
 end
 
 -- returns the list of exported functions
