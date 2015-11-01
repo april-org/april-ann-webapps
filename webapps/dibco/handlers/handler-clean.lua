@@ -61,7 +61,6 @@ end
 GET 'demo' {
   function(req, resp, pathParams)
     collectgarbage("collect")
-    resp:setStatus(200)
     send_file(table.concat{ root, "/views/index.html"}, resp,
               get_mime_from_filename("index.html"))
   end
@@ -80,10 +79,9 @@ GET 'images/:type/:hash' {
     local path = table.concat{ img_path, "/", hash }
     local f    = io.open(path)
     if f then
-      resp:setStatus(200)
       send_file(f, resp, get_mime_from_filename(hash))
     else
-      resp:setStatus(404)
+      return 404
     end
   end
 }
@@ -152,7 +150,7 @@ POST 'api/clean' {
     local model        = params.model
     local example      = params.example
     local name,path,file_info
-    if #example == 0 then
+    if not example or #example == 0 then
       -- in case of no example, the data is taken from a multipart file
       file_info = files.image
       name,path = file_info.name,file_info.path
@@ -176,16 +174,20 @@ POST 'api/clean' {
     local dirty_dest = table.concat{ dirty_path, "/", hashed_name }
     local clean_dest = table.concat{ clean_path, "/", hashed_name }
     ImageIO.write(img_dirty, dirty_dest, ext)
+    -- send response
+    resp:setStatus(200)
+    resp:startStreaming()
+    resp:appendBody("[%q]"%{hashed_name})
+    resp:flush()
+    resp:close()
+    --
     if not io.open(clean_dest) then
       -- execute clean process in a new thread
-      local thread = scheduler.startUserThread(function()
-          -- only execute cleaning in case the destination path doesn't exists
-          local model_path = table.concat{ nets_path, "/", model }
-          local img_clean = clean_image(model_path, img_dirty) -- threaded
-          ImageIO.write(img_clean, clean_dest)
-      end)
+      -- only execute cleaning in case the destination path doesn't exists
+      local model_path = table.concat{ nets_path, "/", model }
+      local img_clean = clean_image(model_path, img_dirty) -- threaded
+      ImageIO.write(img_clean, clean_dest)
     end
-    return hashed_name
   end
 }
 

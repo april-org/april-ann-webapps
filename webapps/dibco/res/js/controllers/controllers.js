@@ -10,7 +10,7 @@ function modal_error(message, log) {
 
 angular.module('myApp.controllers', []).
     // global variables of the App
-    controller('AppCtrl', function($scope, $http, $location, $log) {
+    controller('appController', function($scope, $http, $location, $log) {
 	$scope.refs = {
 	    item: { }
 	};
@@ -24,15 +24,16 @@ angular.module('myApp.controllers', []).
 	    error(modal_error('Unable to get appname', $log));
     }).
     // base controller for all the app pages
-    controller('baseCtrl', function($scope, $http) {
+    controller('baseController', function($scope, $http) {
     }).
     // controller for demo image submission
-    controller('demoCtrl', function($scope, $http, $location, $log) {
+    controller('demoController', function($scope, $http, $location,
+                                          $interval, $log) {
         $scope.reset = function() {
             $scope.refs.item = {
-                "image" : null,
-                "example" : null,
-                "model" : null
+                "image" : '',
+                "example" : '',
+                "model" : ''
             };
         };
         $scope.reset();
@@ -49,15 +50,32 @@ angular.module('myApp.controllers', []).
         $scope.submitForm = function() {
             var fd = new FormData();
             if ($scope.refs.item.image != '') fd.append('image', $scope.refs.item.image);
-            if ($scope.refs.item.example) fd.append('example', $scope.refs.item.example);
+            if ($scope.refs.item.example != '') fd.append('example', $scope.refs.item.example);
             fd.append('model', $scope.refs.item.model);
             $http.post("/dibco/api/clean", fd, {
                 headers: {'Content-Type': undefined},
                 transformRequest: angular.identity
             }).
                 success(function(data, status, headers, config) {
-                    $scope.dirty_image = "/dibco/images/dirty/"+data;
-                    $scope.cleaned_image = "/dibco/images/clean/"+data;
+                    $scope.refs.dirty_image = "/dibco/images/dirty/"+data[0];
+                    $scope.refs.cleaned_image = "/dibco/res/loading.gif";
+                    var cleaned_image_url = "/dibco/images/clean/"+data[0];
+                    var stop = $interval(function() {
+                        $http.get(cleaned_image_url).
+                            success(function(data,status,headers,config) {
+                                if (status != 404) {
+                                    $scope.stop_interval();
+                                    $scope.refs.cleaned_image = cleaned_image_url;
+                                }
+                            }).
+                            error(modal_error("Unable to GET image", $log));
+                    }, 10000);
+                    $scope.stop_interval = function() {
+                        if (angular.isDefined(stop)) {
+                            $interval.cancel(stop);
+                            stop = undefined;
+                        }
+                    };
                 }).
                 error(modal_error("Unable to process POST request", $log));
         };

@@ -1,6 +1,6 @@
 <div>
   <h2>DIBCO image cleaning demo</h2>
-  <form class="css-form" name="form1" ng-controller="demoCtrl">
+  <form class="css-form" name="form1" ng-controller="demoController">
     <label>Select a model</label>
     <select name="model" ng-model="refs.item.model"
             ng-options="i for i in nets_list|orderBy:['i']"
@@ -21,8 +21,8 @@
     </div>
   </form>
   <div>
-    <img src="{{$scope.dirty_image}}">
+    <img ng-src="{{refs.dirty_image}}">
     <br>
-    <img src="{{$scope.cleaned_image}}">
+    <img ng-src="{{refs.cleaned_image}}">
   </div>
 </div>

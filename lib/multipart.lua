@@ -28,7 +28,7 @@ local function parse(req)
           name    = fileName,     -- real filename
           path    = tmpname,      -- path to temporary file
           type    = contentType,  -- type of its content (if given)
-          size    = #size,        -- size in bytes of the data
+          size    = size,         -- size in bytes of the data
           clean   = function()
             assert(os.remove(tmpname), "Unable to remove the temporary file")
           end, -- removes temporary file
